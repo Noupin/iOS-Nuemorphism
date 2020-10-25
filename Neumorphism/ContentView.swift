@@ -58,7 +58,6 @@ struct NeumorphicView<S: Shape>: View {
             else{
                 shape
                     .fill(bgColor)
-                    .mask(shape.fill(LinearGradient(Color.clear, Color.black)))
                     .shadow(color: Color.black, radius: 10, x: 10, y: 10)
                     .shadow(color: Color.white, radius: 10, x: -5, y: -5)
                     .blendMode(.overlay)
@@ -68,8 +67,8 @@ struct NeumorphicView<S: Shape>: View {
 }
 
 struct NeuButtonStyle<S: Shape>: ButtonStyle{
-    let color: Color
-    let shape: S
+    var color: Color
+    var shape: S
     
     func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
@@ -80,6 +79,16 @@ struct NeuButtonStyle<S: Shape>: ButtonStyle{
     }
 }
 
+struct NeuTextFieldStyle: TextFieldStyle{
+    var color: Color
+    
+    func _body(configuration: TextField<_Label>) -> some View {
+            configuration
+                .padding(30)
+                .background(NeumorphicView(isHightlight: false, shape: RoundedRectangle(cornerRadius: 25), bgColor: color))
+        }
+}
+
 struct ContentView: View {
     @State var hexColor: String = ""
     @State var color: Color = Color(hex: "ececec")
@@ -88,19 +97,25 @@ struct ContentView: View {
         ZStack{
             color
             
-            VStack(spacing: 40){
+            VStack(spacing: 60){
                 Button(action: {
+                    if self.hexColor == ""{
+                        self.hexColor = "ececec"
+                    }
                     self.color = Color(hex: hexColor)
                 }, label: {
-                    Image(systemName: "heart.fill")
+                    Image(systemName: "touchid")
+                        .resizable()
+                        .frame(width: 40, height: 40, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
                         .foregroundColor(.blue)
                 })
                 .buttonStyle(NeuButtonStyle(color: color, shape: Circle()))
                 
                 
                 TextField("Enter Hex Here", text: self.$hexColor)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: /*@START_MENU_TOKEN@*/100/*@END_MENU_TOKEN@*/, height: 25, alignment: .center)
+                    .frame(width: 200, height: 25, alignment: .center)
+                    .textFieldStyle(NeuTextFieldStyle(color: color))
+                    .keyboardType(.default)
             }
         }.edgesIgnoringSafeArea(.all)
     }
