@@ -65,8 +65,8 @@ struct NeumorphicView<S: Shape>: View {
             }
             else{
                 shape
-                    .shadow(color: Color.black, radius: 10, x: 5, y: 5)
-                    .shadow(color: Color.white, radius: 10, x: -5, y: -5)
+                    .shadow(color: Color.black.opacity(0.7), radius: 10, x: 5, y: 5)
+                    .shadow(color: Color.white.opacity(0.5), radius: 10, x: -5, y: -5)
                     .blendMode(.overlay)
                 shape
                     .fill(bgColor)
@@ -84,7 +84,7 @@ struct NeuButtonStyle<S: Shape>: ButtonStyle{
             .padding(30)
             .contentShape(Circle())
             .background(NeumorphicView(isHightlight: configuration.isPressed, shape: shape, bgColor: color))
-            .animation(.easeIn(duration: 0.25))
+            .animation(.easeIn(duration: 0.125))
     }
 }
 
@@ -102,23 +102,36 @@ struct NeuTextFieldStyle: TextFieldStyle{
 struct ContentView: View {
     @State var hexColor: String = ""
     @State var color: Color = Color(hex: "ececec")
+    @State var btnFgHex: String = "0000ff"
+    @State var btnFgColor: Color = Color(hex: "0000ff")
     
     var body: some View {
         ZStack{
             color
             
             VStack(spacing: 60){
+                Spacer()
+                    .frame(height: 150.0)
                 Button(action: {
                     self.hideKeyboard()
                     if self.hexColor == "" {
                         self.hexColor = "ececec"
                     }
                     self.color = Color(hex: hexColor)
+                    if self.btnFgHex == "0000ff"{
+                        self.btnFgHex = "00ff00"
+                        self.btnFgColor = Color(hex: self.btnFgHex)
+                    }
+                    else{
+                        self.btnFgHex = "0000ff"
+                        self.btnFgColor = Color(hex: self.btnFgHex)
+                    }
+                    
                 }, label: {
                     Image(systemName: "touchid")
                         .resizable()
                         .frame(width: 40, height: 40, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
-                        .foregroundColor(.blue)
+                        .foregroundColor(self.btnFgColor)
                 })
                 .buttonStyle(NeuButtonStyle(color: color, shape: Circle()))
                 
@@ -126,11 +139,14 @@ struct ContentView: View {
                 TextField("Enter Hex Here", text: self.$hexColor)                    .frame(width: 200, height: 25, alignment: .center)
                     .textFieldStyle(NeuTextFieldStyle(color: color))
                     .keyboardType(.default)
+                
+                Spacer()
             }
         }.edgesIgnoringSafeArea(.all)
         .onTapGesture(count: 1, perform: {
             self.hideKeyboard()
         })
+        
     }
 }
 
