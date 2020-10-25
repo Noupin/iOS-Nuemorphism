@@ -7,6 +7,14 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+#endif
+
 extension Color {
     init(hex: String) {
         let scanner = Scanner(string: hex)
@@ -48,7 +56,7 @@ struct NeumorphicView<S: Shape>: View {
                     )
                     .overlay(
                         shape
-                            .stroke(Color.white, lineWidth: 8)
+                            .stroke(Color.white, lineWidth: 6)
                             .blur(radius: 4)
                             .offset(x: -2, y: -2)
                             .mask(shape.fill(LinearGradient(Color.clear, Color.black)))
@@ -57,10 +65,11 @@ struct NeumorphicView<S: Shape>: View {
             }
             else{
                 shape
-                    .fill(bgColor)
-                    .shadow(color: Color.black, radius: 10, x: 10, y: 10)
+                    .shadow(color: Color.black, radius: 10, x: 5, y: 5)
                     .shadow(color: Color.white, radius: 10, x: -5, y: -5)
                     .blendMode(.overlay)
+                shape
+                    .fill(bgColor)
             }
         }
     }
@@ -75,7 +84,7 @@ struct NeuButtonStyle<S: Shape>: ButtonStyle{
             .padding(30)
             .contentShape(Circle())
             .background(NeumorphicView(isHightlight: configuration.isPressed, shape: shape, bgColor: color))
-            .animation(.easeIn(duration: 0.1))
+            .animation(.easeIn(duration: 0.25))
     }
 }
 
@@ -85,6 +94,7 @@ struct NeuTextFieldStyle: TextFieldStyle{
     func _body(configuration: TextField<_Label>) -> some View {
             configuration
                 .padding(30)
+                .accentColor(.blue)
                 .background(NeumorphicView(isHightlight: false, shape: RoundedRectangle(cornerRadius: 25), bgColor: color))
         }
 }
@@ -99,7 +109,8 @@ struct ContentView: View {
             
             VStack(spacing: 60){
                 Button(action: {
-                    if self.hexColor == ""{
+                    self.hideKeyboard()
+                    if self.hexColor == "" {
                         self.hexColor = "ececec"
                     }
                     self.color = Color(hex: hexColor)
@@ -112,12 +123,14 @@ struct ContentView: View {
                 .buttonStyle(NeuButtonStyle(color: color, shape: Circle()))
                 
                 
-                TextField("Enter Hex Here", text: self.$hexColor)
-                    .frame(width: 200, height: 25, alignment: .center)
+                TextField("Enter Hex Here", text: self.$hexColor)                    .frame(width: 200, height: 25, alignment: .center)
                     .textFieldStyle(NeuTextFieldStyle(color: color))
                     .keyboardType(.default)
             }
         }.edgesIgnoringSafeArea(.all)
+        .onTapGesture(count: 1, perform: {
+            self.hideKeyboard()
+        })
     }
 }
 
